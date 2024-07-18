@@ -6,8 +6,9 @@ using RoR2;
 using UnityEngine.Networking;
 using UnityEngine;
 using RoR2.Projectile;
+using UncappedChances;
 
-namespace UncappedChances
+namespace UncappedChances.Effects
 {
     public class Bleed
     {
@@ -27,7 +28,7 @@ namespace UncappedChances
         private void Hooks()
         {
             MainPlugin.ModLogger.LogInfo("Applying Bleed IL modifications");
-            On.RoR2.GlobalEventManager.OnHitEnemy += GlobalEventManager_HitEnemy;
+            SharedHooks.Handle_GlobalHitEvent_Actions += GlobalEventManager_HitEnemy;
             IL.RoR2.GlobalEventManager.OnHitEnemy += new ILContext.Manipulator(IL_OnHitEnemy);
         }
 
@@ -61,17 +62,8 @@ namespace UncappedChances
             DotController.InflictDot(victim, damageInfo.attacker, DotController.DotIndex.Bleed, 3f * damageInfo.procCoefficient, 1f, maxStacksFromAttacker);
         }
 
-        internal static void GlobalEventManager_HitEnemy(On.RoR2.GlobalEventManager.orig_OnHitEnemy orig, GlobalEventManager self, DamageInfo damageInfo, GameObject victim)
+        private void GlobalEventManager_HitEnemy(GameObject victim, CharacterBody attackerBody, DamageInfo damageInfo)
         {
-            orig(self, damageInfo, victim);
-            if (!NetworkServer.active)
-            {
-                return;
-            }
-            if (!victim || !damageInfo.attacker)
-            {
-                return;
-            }
             if (damageInfo.procChainMask.HasProc(ProcType.BleedOnHit))
             {
                 return;
@@ -87,11 +79,15 @@ namespace UncappedChances
                 }
             }
 
-            CharacterBody attackerBody = damageInfo.attacker.GetComponent<CharacterBody>();
             float bleedChance = attackerBody.bleedChance * damageInfo.procCoefficient;
             if ((damageInfo.damageType & DamageType.BleedOnHit) != 0)
             {
                 ApplyBleed(attackerBody, victim, damageInfo, maxStacksFromAttacker);
+            }
+            if (!attackerBody.inventory)
+            {
+                //MainPlugin.ModLogger.LogInfo($"bleed no inventory {attackerBody.inventory}");
+                return;
             }
             if (attackerBody.inventory.GetItemCount(RoR2Content.Items.BleedOnHitAndExplode) > 0 && damageInfo.crit)
             {

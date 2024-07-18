@@ -1,13 +1,10 @@
-using System;
-using R2API;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
-using UnityEngine.Networking;
 using UnityEngine;
 using RoR2.Projectile;
 
-namespace UncappedChances
+namespace UncappedChances.Effects
 {
     public class Collapse
     {
@@ -27,7 +24,7 @@ namespace UncappedChances
         private void Hooks()
         {
             MainPlugin.ModLogger.LogInfo("Applying Collapse IL modifications");
-            On.RoR2.GlobalEventManager.OnHitEnemy += GlobalEventManager_HitEnemy;
+            SharedHooks.Handle_GlobalHitEvent_Actions += GlobalEventManager_HitEnemy;
             IL.RoR2.GlobalEventManager.OnHitEnemy += new ILContext.Manipulator(IL_OnHitEnemy);
         }
 
@@ -58,17 +55,8 @@ namespace UncappedChances
             DotController.InflictDot(victim, damageInfo.attacker, DotController.DotIndex.Fracture, dotDef.interval, 1f, maxStacksFromAttacker);
         }
 
-        internal static void GlobalEventManager_HitEnemy(On.RoR2.GlobalEventManager.orig_OnHitEnemy orig, GlobalEventManager self, DamageInfo damageInfo, GameObject victim)
+        private void GlobalEventManager_HitEnemy(GameObject victim, CharacterBody attackerBody, DamageInfo damageInfo)
         {
-            orig(self, damageInfo, victim);
-            if (!NetworkServer.active)
-            {
-                return;
-            }
-            if (!victim || !damageInfo.attacker)
-            {
-                return;
-            }
             if (damageInfo.procChainMask.HasProc(ProcType.BleedOnHit))
             {
                 return;
@@ -84,7 +72,6 @@ namespace UncappedChances
                 }
             }
 
-            CharacterBody attackerBody = damageInfo.attacker.GetComponent<CharacterBody>();
             int needleTickCount = attackerBody.inventory.GetItemCount(DLC1Content.Items.BleedOnHitVoid);
             needleTickCount += attackerBody.HasBuff(DLC1Content.Buffs.EliteVoid) ? 10 : 0;
             float collapseChance = (float)needleTickCount * 10f * damageInfo.procCoefficient;

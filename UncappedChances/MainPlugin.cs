@@ -1,5 +1,5 @@
 ﻿using BepInEx;
-using HG.AssetManagement;
+using UncappedChances.Effects;
 using R2API;
 
 namespace UncappedChances
@@ -14,8 +14,8 @@ namespace UncappedChances
     {
         public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "ZetaDaemon";
-        public const string PluginName = "Uncapped Chances";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginName = "UncappedChances";
+        public const string PluginVersion = "1.0.3";
 
         internal static BepInEx.Logging.ManualLogSource ModLogger;
         public static PluginInfo pluginInfo;
@@ -26,6 +26,7 @@ namespace UncappedChances
             pluginInfo = Info;
             Configs.Setup();
             EnableChanges();
+            SharedHooks.Setup();
         }
         private void EnableChanges()
         {

@@ -4,15 +4,18 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
 using UnityEngine.AddressableAssets;
+using UncappedChances;
 
-namespace UncappedChances
+namespace UncappedChances.Effects
 {
     public class Crit
     {
         internal static bool EnableDefault = true;
         internal static bool HarderSuccessiveDefault = false;
+        internal static bool MultiplicativeCritDefault = true;
         internal static bool Enable = EnableDefault;
         internal static bool HarderSuccessive = HarderSuccessiveDefault;
+        internal static bool MultiplicativeCrit = MultiplicativeCritDefault;
         public Crit()
         {
             if (!Enable)
@@ -58,7 +61,14 @@ namespace UncappedChances
                     }
                     if (Util.CheckRoll(critChance / rolls, body.master))
                     {
-                        critMultiplier += body.critMultiplier;
+                        if (MultiplicativeCrit)
+                        {
+                            critMultiplier *= body.critMultiplier;
+                        }
+                        else
+                        {
+                            critMultiplier += body.critMultiplier;
+                        }
                     }
                     critChance -= rolls * 100f;
                 }

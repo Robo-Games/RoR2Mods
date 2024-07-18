@@ -1,6 +1,6 @@
 {
     "name": "UncappedChances",
-    "version_number": "1.0.0",
+    "version_number": "1.0.3",
     "website_url": "https://github.com/ZetaDaemon/RoR2Mods",
     "description": "Allows stacking chance items to roll multiple times past 100%",
     "dependencies": []
