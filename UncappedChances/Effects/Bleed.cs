@@ -86,7 +86,6 @@ namespace UncappedChances.Effects
             }
             if (!attackerBody.inventory)
             {
-                //MainPlugin.ModLogger.LogInfo($"bleed no inventory {attackerBody.inventory}");
                 return;
             }
             if (attackerBody.inventory.GetItemCount(RoR2Content.Items.BleedOnHitAndExplode) > 0 && damageInfo.crit)

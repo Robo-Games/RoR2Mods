@@ -10,6 +10,8 @@ namespace UncappedChances
         private const string Section_Crit = "Crit";
         private const string Section_Bleed = "Bleed";
         private const string Section_Collapse = "Collapse";
+        private const string Section_Ghors = "Ghors Tome";
+        private const string Section_Sticky = "Sticky Bomb";
         private const string Label_EnableChange = "Enable Changes";
         private const string Desc_Enable = "Enables changes for this item.";
 
@@ -30,6 +32,13 @@ namespace UncappedChances
 
             Collapse.Enable = ModConfig.Bind(Section_Collapse, Label_EnableChange, Collapse.EnableDefault, Desc_Enable).Value;
             Collapse.HarderSuccessive = ModConfig.Bind(Section_Collapse, "Lower Successive Stacks", Collapse.HarderSuccessiveDefault, "Each successive collapse stack has a low chance to proc.").Value;
+
+            GhorsTome.Enable = ModConfig.Bind(Section_Ghors, Label_EnableChange, GhorsTome.EnableDefault, Desc_Enable).Value;
+            GhorsTome.HarderSuccessive = ModConfig.Bind(Section_Ghors, "Lower Successive Drops", GhorsTome.HarderSuccessiveDefault, "Each successive drop has a low chance to proc.").Value;
+
+            StickyBomb.Enable = ModConfig.Bind(Section_Sticky, Label_EnableChange, StickyBomb.EnableDefault, Desc_Enable).Value;
+            StickyBomb.HarderSuccessive = ModConfig.Bind(Section_Sticky, "Lower Successive Bombs", StickyBomb.HarderSuccessiveDefault, "Each successive sticky bomb has a low chance to proc.").Value;
+            StickyBomb.SingleBomb = ModConfig.Bind(Section_Sticky, "One Bomb", StickyBomb.SingleBombDefault, "Instead of applying multiple bombs, apply 1 with the total damage.").Value;
 
         }
     }

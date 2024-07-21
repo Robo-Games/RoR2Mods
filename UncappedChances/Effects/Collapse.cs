@@ -3,6 +3,8 @@ using MonoMod.Cil;
 using RoR2;
 using UnityEngine;
 using RoR2.Projectile;
+using System;
+using R2API.Utils;
 
 namespace UncappedChances.Effects
 {
@@ -14,17 +16,16 @@ namespace UncappedChances.Effects
         internal static bool HarderSuccessive = HarderSuccessiveDefault;
         public Collapse()
         {
-            /*if (!Enable)
+            if (!Enable)
             {
                 return;
-            }*/
+            }
             Hooks();
         }
 
         private void Hooks()
         {
             MainPlugin.ModLogger.LogInfo("Applying Collapse IL modifications");
-            SharedHooks.Handle_GlobalHitEvent_Actions += GlobalEventManager_HitEnemy;
             IL.RoR2.GlobalEventManager.OnHitEnemy += new ILContext.Manipulator(IL_OnHitEnemy);
         }
 
@@ -33,61 +34,47 @@ namespace UncappedChances.Effects
             ILCursor ilcursor = new ILCursor(il);
             if (!ilcursor.TryGotoNext
             (
-                x => x.MatchLdarg(1),
-                x => x.MatchLdflda(typeof(RoR2.DamageInfo), "procChainMask"),
-                x => x.MatchLdcI4(19),
-                x => x.MatchCall(typeof(RoR2.ProcChainMask), "HasProc")
+                x => x.MatchLdsfld("RoR2.DLC1Content/Items", "BleedOnHitVoid")
             ))
             {
                 MainPlugin.ModLogger.LogError("Collapse - IL Hook Failed");
                 return;
             }
-            ilcursor.Index += 4;
+            ilcursor.Index += 13;
+
+            ilcursor.Emit(OpCodes.Ldloc_1);
+            ilcursor.Emit(OpCodes.Ldarg_2);
+            ilcursor.Emit(OpCodes.Ldloc, 24);
+            ilcursor.Emit(OpCodes.Ldarg_1);
+            ilcursor.Emit(OpCodes.Ldloc_0);
+            ilcursor.EmitDelegate<Action<CharacterBody, GameObject, int, DamageInfo, uint?>>((attackerBody, victim, stacks, damageInfo, maxStacksFromAttacker) =>
+            {
+                float collapseChance = (float)stacks * 10f * damageInfo.procCoefficient;
+                float rolls = 1f;
+                while (collapseChance > 0)
+                {
+                    if (Util.CheckRoll(collapseChance / rolls, attackerBody.master))
+                    {
+                        ApplyCollapse(victim, damageInfo, maxStacksFromAttacker);
+                    }
+                    collapseChance -= rolls * 100f;
+                    if (HarderSuccessive)
+                    {
+                        rolls += 1f;
+                    }
+                }
+            });
+            ilcursor.Index += 1;
             ilcursor.Emit(OpCodes.Pop);
-            ilcursor.Emit(OpCodes.Ldc_I4_1);
+            ilcursor.Emit(OpCodes.Ldc_I4_0);
         }
 
-        static void ApplyCollapse(CharacterBody attacker, GameObject victim, DamageInfo damageInfo, uint? maxStacksFromAttacker = null)
+        static void ApplyCollapse(GameObject victim, DamageInfo damageInfo, uint? maxStacksFromAttacker = null)
         {
             ProcChainMask procChainMask2 = damageInfo.procChainMask;
             procChainMask2.AddProc(ProcType.BleedOnHit);
             DotController.DotDef dotDef = DotController.GetDotDef(DotController.DotIndex.Fracture);
             DotController.InflictDot(victim, damageInfo.attacker, DotController.DotIndex.Fracture, dotDef.interval, 1f, maxStacksFromAttacker);
-        }
-
-        private void GlobalEventManager_HitEnemy(GameObject victim, CharacterBody attackerBody, DamageInfo damageInfo)
-        {
-            if (damageInfo.procChainMask.HasProc(ProcType.BleedOnHit))
-            {
-                return;
-            }
-
-            uint? maxStacksFromAttacker = null;
-            if ((bool)damageInfo?.inflictor)
-            {
-                ProjectileDamage component = damageInfo.inflictor.GetComponent<ProjectileDamage>();
-                if ((bool)component && component.useDotMaxStacksFromAttacker)
-                {
-                    maxStacksFromAttacker = component.dotMaxStacksFromAttacker;
-                }
-            }
-
-            int needleTickCount = attackerBody.inventory.GetItemCount(DLC1Content.Items.BleedOnHitVoid);
-            needleTickCount += attackerBody.HasBuff(DLC1Content.Buffs.EliteVoid) ? 10 : 0;
-            float collapseChance = (float)needleTickCount * 10f * damageInfo.procCoefficient;
-            float rolls = 1f;
-            while (collapseChance > 0)
-            {
-                if (Util.CheckRoll(collapseChance / rolls, attackerBody.master))
-                {
-                    ApplyCollapse(attackerBody, victim, damageInfo, maxStacksFromAttacker);
-                }
-                collapseChance -= rolls * 100f;
-                if (HarderSuccessive)
-                {
-                    rolls += 1f;
-                }
-            }
         }
     }
 }

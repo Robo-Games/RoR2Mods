@@ -27,10 +27,10 @@ namespace UncappedChances.Effects
         private void Hooks()
         {
             MainPlugin.ModLogger.LogInfo("Applying Ghors IL modifications");
-            IL.RoR2.HealthComponent.TakeDamage += new ILContext.Manipulator(IL_TakeDamage);
+            IL.RoR2.GlobalEventManager.OnCharacterDeath += new ILContext.Manipulator(IL_OnCharacterDeath);
         }
 
-        private void IL_TakeDamage(ILContext il)
+        private void IL_OnCharacterDeath(ILContext il)
         {
             ILCursor ilcursor = new ILCursor(il);
             if (!ilcursor.TryGotoNext

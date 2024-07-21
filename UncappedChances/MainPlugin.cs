@@ -15,7 +15,7 @@ namespace UncappedChances
         public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "ZetaDaemon";
         public const string PluginName = "UncappedChances";
-        public const string PluginVersion = "1.0.3";
+        public const string PluginVersion = "1.1.0";
 
         internal static BepInEx.Logging.ManualLogSource ModLogger;
         public static PluginInfo pluginInfo;
@@ -33,6 +33,8 @@ namespace UncappedChances
             new Crit();
             new Bleed();
             new Collapse();
+            new GhorsTome();
+            new StickyBomb();
         }
     }
 }
