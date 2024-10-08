@@ -67,7 +67,7 @@ namespace UncappedChances.Effects
                         }
                         else
                         {
-                            critMultiplier += body.critMultiplier;
+                            critMultiplier += body.critMultiplier - 1;
                         }
                     }
                     critChance -= rolls * 100f;
