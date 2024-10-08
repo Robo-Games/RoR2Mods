@@ -25,7 +25,7 @@ namespace UncappedChances
         {
             Crit.Enable = ModConfig.Bind(Section_Crit, Label_EnableChange, Crit.EnableDefault, Desc_Enable).Value;
             Crit.HarderSuccessive = ModConfig.Bind(Section_Crit, "Lower Successive Crits", Crit.HarderSuccessiveDefault, "Each successive crit has a low chance to proc.").Value;
-            Crit.MultiplicativeCrit = ModConfig.Bind(Section_Crit, "Multiplicative Crits", Crit.MultiplicativeCritDefault, "Each crit multiplies the previous, ie 2-4-8 instead of 2-4-6").Value;
+            Crit.MultiplicativeCrit = ModConfig.Bind(Section_Crit, "Multiplicative Crits", Crit.MultiplicativeCritDefault, "Each crit multiplies the previous, ie 2-4-8 instead of 2-3-4").Value;
 
             Bleed.Enable = ModConfig.Bind(Section_Bleed, Label_EnableChange, Bleed.EnableDefault, Desc_Enable).Value;
             Bleed.HarderSuccessive = ModConfig.Bind(Section_Bleed, "Lower Successive Stacks", Bleed.HarderSuccessiveDefault, "Each successive bleed stack has a low chance to proc.").Value;
